@@ -122,3 +122,76 @@ Kubernetes 系统中另一个核心概念。一个Label 是一个 key=value 键�
 质量管控标签: "track":"daily"/"weekly"
 ```
 
+> label Selector
+
+当前有两种表达式, 基于等式(Equality-based) 和 基于集合(Set-based)
+
+1. 基于等式
+  - name=redis-slave: 匹配所有符合的资源对象
+  - name!= prod: 匹配所有非 name=prod 的
+2. 基于集合
+  - name in (redis-mater, redis-slave): 匹配所有 redis-mater 或者 redis-slave
+  - name notin (php-fronted) 匹配所有不具有 php-fronted
+
+> 使用场景
+
+> Kuber-controller 通过资源对象 RC 定义的 label Selector 筛选要监控的副本数量
+> Kuber-proxy 通过 Service 的 Label Selector 来选择对应的 Pod, 从而实现 Service 对 Pod 的请求转发路由表, 从而实现 Service 的智能负载均衡。
+> 通过Node定义的Label, 实现定向调度
+
+
+## Replication Controller(RC)
+
+核心概念, 定义一个期望场景, 即声明某种 Pod 副本数量在任意时刻
+都符合某个预期值, 所以 RC 定义了以下几个部分。
+
+- Pod 期待数量的副本数(replicas)
+- 用于筛选目标 Pod 的 Label Selector
+- 当 Pod 的副本数量小于 预期值时, 用于创建新 Pod 的模板(template)
+
+以下是一个完整的 rc 定义
+```yaml
+apiVersion: v1 
+kind: ReplicationController 
+metadata: 
+  name: frontend
+spec: 
+  replicas: 1 
+  selector: 
+    # 与 template 相同 否则会无限创建
+    tier: frontend 
+  template: 
+    metadata: 
+      labels: 
+        app: app-demo 
+        tier: frontend 
+        spec: 
+          containers: 
+            - name: tomcat-demo 
+              image: tomcat 
+              imagePullPolicy: IfNotPresent 
+              env: 
+                - name: GET_HOSTS_FROM 
+                  value: dns 
+              ports: 
+                - containerPort: 80
+```
+将上面的RC 提交到 Kubernetes 集群的 Mater 节点上的 Controller Manager 组件就得到通知, 定期检查系统中存活的目标 Pod, 并确保 Pod 实力数量相同如果小于期望值 则创建, 过多则暂停。
+
+更新 RC
+删除 RC 并不会影响通过该 RC 已创建好的 Pod, 可以先设置 replicas 再更新RC。另外,
+kubectrl 提供 stop 和 delete 命令来一次性删除 RC 和 RC 控制的全部 Pod
+
+
+> Rolling Update
+
+滚动升级, 详见第4章
+
+> Replica Set - 下一代的 RC
+
+总结 RC 特性与作用
+- 通常使用 RC 实现 Pod 的创建以及副本数量的控制
+- RC 里包括完整的 Pod 定义模板
+- RC 通过 Label Selector 机制对实现 Pod 副本的自动控制
+- 通过RC 的 Pod 副本数量, 可以扩展或者缩容 Pod
+- 通过RC 里的Pod 模板中的镜像版本, 可以海鲜 Pod 的滚动升级
