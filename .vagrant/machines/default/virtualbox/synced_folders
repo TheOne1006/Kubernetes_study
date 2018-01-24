@@ -1,0 +1,1 @@
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"/Users/mac/Programme/docker-machine/Kubernetes-env1","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}},"virtualbox":{"/vagrant_data":{"guestpath":"/vagrant_data","hostpath":"/Users/mac/Programme/docker-machine/Kubernetes-env1/data","disabled":false,"__vagrantfile":true}}}
