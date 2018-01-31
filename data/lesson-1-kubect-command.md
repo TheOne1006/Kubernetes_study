@@ -8,6 +8,15 @@ systemctl disable firewalld
 systemctl stop firewalld 
 ```
 
+2. 安装与启动
+```bash
+yum install -y etcd kubernetes
+
+# kubernetes 自动依赖安装 docker
+
+sudo systemctl start etcd docker kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
+```
+
 ```bash
 # 查看 ReplicationController
 > kubectl get rc

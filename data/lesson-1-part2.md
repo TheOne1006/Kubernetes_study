@@ -74,3 +74,23 @@ Kubernetes 也遵循上述常规做法，运行在每个 Node 的 kube-proxy 进
 这样每个服务就变成一个具备唯一IP地址的 "通信节点", 服务调用就变成最基础的 TCP 网络通信。
 
 
+
+> 三种IP
+
+Node IP:
+  - 物理网卡的IP地址，真是存在的物理网络
+  - 不是由 Kubernetes 创建
+Pod IP:
+  - Pod IP 是每个Pod 的地址
+  - Docker Engine 根据 docker0 网桥的IP 地址段进行分配的
+  - 通常是 __虚拟的二层网络__
+  - Pod 可以直接访问, 就是通过这个 虚拟二层网络实现的, 而真实的流量是通过 Node IP 所在的物理网卡流动的
+Cluster IP: 虚拟IP, 更像是一个"伪造的IP"原因如下
+  - Cluster IP 仅仅作用于 Kubernetes Service 这个对象, 并由 Kubernetes 管理和分配IP
+  - Cluster IP 无法被 Ping, 因为没哟一个 "实体网络对象" 来相应 ??
+  - Cluster IP 只能结合 Service Port 组成具体的通信端口, 单独的 Cluster IP 不具有 TCP/IP 的通信基础。
+  - 并且他们只属于 Kubernetes 集群这样一个封闭的空间， 集群之外的节点要访问这个通信端口需要额外的工作。
+
+
+
+负载均衡?
